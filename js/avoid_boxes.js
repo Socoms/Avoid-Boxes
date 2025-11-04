@@ -512,7 +512,7 @@ function drawBossNotification() {
   // 안내 메시지
   ctx.font = "18px Arial";
   ctx.fillStyle = isLightTheme ? "#fff" : "#ffeb3b";
-  ctx.fillText("Z키를 눌러 발사체로 보스를 공격하세요!", canvas.width / 2, canvas.height / 2 + 10);
+  ctx.fillText("A키를 눌러 발사체로 보스를 공격하세요!", canvas.width / 2, canvas.height / 2 + 10);
   ctx.fillText("발사체가 보스에 닿으면 데미지 (500점 보너스)", canvas.width / 2, canvas.height / 2 + 35);
   
   // 보스 HP 표시
