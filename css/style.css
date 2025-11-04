@@ -1,0 +1,1334 @@
+/* ========================================
+   Avoid Boxes - Premium Game Design CSS
+   다채로운 색상과 완벽한 게임 디자인
+   ======================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto:wght@300;400;500;700&display=swap');
+
+/* ========================================
+   전역 스타일 및 배경
+   ======================================== */
+body { 
+  background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #0f1528 100%);
+  background-size: 200% 200%;
+  animation: gradientShift 15s ease infinite;
+  color: #e6e6e6; 
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Roboto', sans-serif;
+  position: relative;
+  overflow-x: hidden;
+  overflow-y: hidden; /* 한 화면 고정: 전역 세로 스크롤 제거 */
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* 배경 애니메이션 */
+body::before {
+  content: none; /* 뒤로 보이는 배경 레이어 제거 */
+}
+
+@keyframes gradientShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@keyframes backgroundPulse {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.1); }
+}
+
+/* ========================================
+   테마 토글 및 사운드 버튼
+   ======================================== */
+.theme-toggle, .sound-toggle { 
+  position: fixed; 
+  top: 20px; 
+  z-index: 10001; /* 시작 메뉴 위에 보이도록 */
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff; 
+  border: none; 
+  padding: 12px 20px; 
+  border-radius: 12px; 
+  cursor: pointer; 
+  font-family: 'Roboto', sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4), 
+              inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.theme-toggle { right: 20px; }
+.sound-toggle { right: 140px; font-size: 18px; padding: 12px 16px; }
+
+.theme-toggle:hover, .sound-toggle:hover { 
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6),
+              inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.theme-toggle:active, .sound-toggle:active {
+  transform: translateY(0);
+}
+
+.theme-light .theme-toggle, .theme-light .sound-toggle { 
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: #fff;
+  box-shadow: 0 4px 15px rgba(245, 87, 108, 0.4);
+}
+
+/* ========================================
+   게임 래퍼 및 캔버스
+   ======================================== */
+.game-wrap {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  width: 100vw;
+  margin: 0;
+  position: relative;
+  justify-content: center;
+  filter: none; /* 시작 메뉴와 겹칠 때 가장자리 그림자 방지 */
+  padding: 0;
+  box-sizing: border-box;
+  max-width: 100vw;
+}
+
+/* 캔버스 컨테이너 */
+.canvas-container {
+  position: relative;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+canvas {
+    display: block;
+  background: linear-gradient(180deg, #1a1f3a 0%, #0f1528 100%);
+  border: 3px solid transparent;
+  border-image: linear-gradient(135deg, #667eea, #764ba2, #f093fb) 1;
+  border-radius: 8px;
+  position: relative;
+  box-shadow: 
+    0 0 30px rgba(102, 126, 234, 0.3),
+    inset 0 0 20px rgba(0, 0, 0, 0.2);
+  width: 100%;
+  height: 100%;
+}
+
+.theme-light canvas {
+  background: linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%);
+  border-image: linear-gradient(135deg, #f093fb, #f5576c, #4facfe) 1;
+  box-shadow: 
+    0 0 30px rgba(245, 87, 108, 0.3),
+    inset 0 0 20px rgba(255, 255, 255, 0.5);
+}
+
+/* ========================================
+   아이템 HUD (스킬 패널)
+   ======================================== */
+.item-hud {
+    width: 320px;
+  height: 600px; /* JS에서 캔버스 높이에 맞춰 동기화 */
+  border: 3px solid transparent;
+  border-image: linear-gradient(135deg, #ff6b6b, #ee5a6f, #c44569) 1;
+  border-radius: 16px;
+  padding: 20px;
+  padding-top: 60px; /* 상단 버튼들과 겹치지 않도록 여유 공간 */
+  box-sizing: border-box;
+  background: linear-gradient(145deg, rgba(20, 24, 33, 0.95), rgba(15, 17, 21, 0.98));
+  backdrop-filter: blur(20px);
+  font-family: 'Roboto', sans-serif;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+  flex-shrink: 0;
+  margin-top: 0; /* padding-top으로 대체하여 상단 버튼과 겹치지 않게 */
+}
+
+.item-hud::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #ff6b6b, #ee5a6f, #c44569, #ff6b6b);
+  background-size: 200% 100%;
+  animation: shimmer 3s linear infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.theme-light .item-hud {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(248, 249, 250, 0.98));
+  border-image: linear-gradient(135deg, #4facfe, #00f2fe, #667eea) 1;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+/* ========================================
+   생명 표시
+   ======================================== */
+.lives-hud { 
+  position: relative; 
+  display: flex; 
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 12px;
+  background: linear-gradient(135deg, rgba(255, 92, 138, 0.2), rgba(255, 107, 107, 0.2));
+  border-radius: 12px;
+  border: 1px solid rgba(255, 92, 138, 0.4);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+  z-index: 10;
+}
+
+.lives-hud svg { 
+  width: 24px; 
+  height: 24px; 
+  display: block; 
+  filter: drop-shadow(0 2px 4px rgba(255, 0, 0, 0.5));
+  animation: heartbeat 1.5s ease-in-out infinite;
+}
+
+@keyframes heartbeat {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.theme-light .lives-hud {
+  background: linear-gradient(135deg, rgba(255, 92, 138, 0.15), rgba(255, 107, 107, 0.15));
+  border-color: rgba(255, 92, 138, 0.3);
+}
+
+.theme-light .lives-hud svg { 
+  filter: drop-shadow(0 2px 4px rgba(255, 0, 0, 0.3));
+}
+
+/* ========================================
+   통계 표시
+   ======================================== */
+.stats-display { 
+  margin-top: 0; 
+  margin-bottom: 20px; 
+  padding: 16px; 
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.15), rgba(118, 75, 162, 0.15));
+  border-radius: 12px; 
+  font-size: 12px;
+  border: 1px solid rgba(102, 126, 234, 0.3);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.stats-display .stat-item { 
+  display: flex; 
+  justify-content: space-between; 
+  margin-bottom: 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.stats-display .stat-item:last-child { 
+  margin-bottom: 0; 
+  border-bottom: none;
+}
+
+.stats-display .stat-label { 
+  color: #a9b0bf; 
+  font-weight: 400;
+}
+
+.stats-display .stat-value { 
+  color: #ffd54f; 
+  font-weight: 700;
+  text-shadow: 0 0 10px rgba(255, 213, 79, 0.5);
+}
+
+.theme-light .stats-display { 
+  background: linear-gradient(135deg, rgba(79, 172, 254, 0.15), rgba(0, 242, 254, 0.15));
+  border-color: rgba(79, 172, 254, 0.3);
+}
+
+.theme-light .stats-display .stat-label { 
+  color: #666; 
+}
+
+.theme-light .stats-display .stat-value { 
+  color: #f57c00;
+  text-shadow: 0 0 10px rgba(245, 124, 0, 0.3);
+}
+
+/* ========================================
+   스킬 슬롯 스타일
+   ======================================== */
+.ability-bar { 
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px; 
+  margin-top: auto;
+  margin-bottom: 0; /* 재시작 버튼과의 간격을 0으로 설정하여 게임 화면 하단과 대칭 */
+  padding: 10px;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.1));
+  border-radius: 12px;
+  border: 1px solid rgba(102, 126, 234, 0.2);
+  flex-wrap: wrap;
+  max-width: 100%;
+  justify-items: center;
+}
+
+.slot { 
+  position: relative; 
+  width: 100%;
+  max-width: 90px;
+  transition: transform 0.3s ease;
+  margin: 0 auto;
+}
+
+.slot:hover {
+  transform: translateY(-4px);
+}
+
+.slot .icon { 
+  width: 100%; 
+  aspect-ratio: 1;
+  border: 2px solid;
+  border-image: linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.1)) 1;
+  border-radius: 12px; 
+  background: linear-gradient(145deg, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6));
+  overflow: hidden;
+  position: relative;
+  box-shadow: 
+    0 4px 15px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.slot .icon::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+  animation: rotate 3s linear infinite;
+}
+
+@keyframes rotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.slot .icon svg { 
+  width: 100%; 
+  height: 100%; 
+  display: block;
+  position: relative;
+  z-index: 1;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+}
+
+.slot .skill-name { 
+  text-align: center; 
+  font-size: 11px; 
+  font-weight: 700; 
+  margin-top: 4px; 
+  color: #e6e6e6;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  font-family: 'Roboto', sans-serif;
+}
+
+.slot .key { 
+  text-align: center; 
+  font-size: 10px; 
+  margin-top: 3px; 
+  color: #888;
+  font-weight: 500;
+  font-family: 'Roboto', monospace;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 2px 5px;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.slot .meta { 
+  text-align: center; 
+  font-size: 9px; 
+  color: #a9b0bf; 
+  margin-top: 3px;
+  line-height: 1.2;
+}
+
+.slot .count { 
+  position: absolute; 
+  top: -6px; 
+  right: -6px; 
+  background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
+  color: #fff; 
+  font-size: 11px; 
+  font-weight: 700;
+  padding: 3px 6px; 
+  border-radius: 10px; 
+  box-shadow: 
+    0 2px 8px rgba(255, 107, 107, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  min-width: 24px;
+  text-align: center;
+  z-index: 10;
+}
+
+.slot.disabled .icon { 
+  filter: grayscale(1) brightness(0.5); 
+  opacity: 0.5;
+}
+
+.slot.active .icon { 
+  outline: 3px solid #ffd54f;
+  box-shadow: 
+    0 0 20px rgba(255, 213, 79, 0.8),
+    0 0 40px rgba(255, 213, 79, 0.4),
+    inset 0 0 20px rgba(255, 213, 79, 0.2);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 20px rgba(255, 213, 79, 0.8), 0 0 40px rgba(255, 213, 79, 0.4); }
+  50% { box-shadow: 0 0 30px rgba(255, 213, 79, 1), 0 0 60px rgba(255, 213, 79, 0.6); }
+}
+
+/* 쿨다운 오버레이 - 아이콘에만 적용 (이제 .icon 안에 있음) */
+.icon .cool-overlay { 
+  position: absolute; 
+  left: 0;
+  top: 0;
+  width: 100%; /* 아이콘 너비에 맞춤 */
+  height: 100%; /* 아이콘 높이에 맞춤 */
+  border-radius: 12px; 
+  display: none; 
+  align-items: center; 
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(2px);
+  pointer-events: none; /* 텍스트 클릭 방해하지 않음 */
+  z-index: 10; /* 아이콘 위에 표시 */
+}
+
+.cool-overlay .pie { 
+  position: absolute; 
+  inset: 0; 
+  border-radius: 12px; 
+  transform: scaleX(-1); 
+}
+
+.cool-overlay .remain { 
+  color: #fff; 
+  font-size: 14px; 
+  font-weight: 700; 
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+  position: relative;
+  z-index: 1;
+}
+
+/* ========================================
+   버튼 스타일
+   ======================================== */
+.restart-btn { 
+  width: 100%; 
+  padding: 12px; 
+  background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+  color: #fff; 
+  border: none; 
+  border-radius: 10px; 
+  cursor: pointer; 
+  font-size: 13px; 
+  font-weight: 700;
+  font-family: 'Roboto', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  box-shadow: 
+    0 4px 15px rgba(76, 175, 80, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+/* HUD 하단 버튼을 항상 아래에 고정되게 */
+.game-controls { 
+  margin-top: 12px; /* 스킬창과 재시작 버튼 사이 간격 */
+  margin-bottom: 0; /* 하단 여백 제거하여 게임 화면과 대칭 */
+}
+
+.restart-btn::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.restart-btn:hover { 
+  background: linear-gradient(135deg, #45a049 0%, #3d8b40 100%);
+  transform: translateY(-2px);
+  box-shadow: 
+    0 6px 20px rgba(76, 175, 80, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.restart-btn:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+.restart-btn:active { 
+  transform: translateY(0);
+  box-shadow: 
+    0 2px 8px rgba(76, 175, 80, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.theme-light .restart-btn { 
+  background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+}
+
+/* ========================================
+   시작 메뉴
+   ======================================== */
+.start-menu { 
+  position: fixed; 
+  top: 0;
+  left: 0;
+  transform: none;
+  width: 100vw;
+  height: 100vh;
+  background: #0a0e27; /* 불투명 배경으로 뒤 레이어 완전 차단 */
+  backdrop-filter: none;
+  display: flex; 
+  align-items: flex-start; 
+  justify-content: center; 
+  z-index: 9999;
+  border-radius: 0;
+  box-sizing: border-box;
+  box-shadow: none;
+  padding: 24px 0 24px; /* 상하 여유 공간 확보 */
+}
+
+.menu-content { 
+  background: linear-gradient(145deg, rgba(27, 31, 42, 0.95), rgba(20, 24, 33, 0.98));
+  backdrop-filter: blur(30px);
+  padding: 30px 40px; 
+  border-radius: 20px; 
+  text-align: center; 
+  border: 2px solid transparent;
+  border-image: linear-gradient(135deg, rgba(102, 126, 234, 0.5), rgba(118, 75, 162, 0.5)) 1;
+  width: 90%;
+  max-width: 800px;
+  max-height: none;
+  box-shadow: 
+    0 20px 60px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  position: relative;
+  overflow: hidden; /* 내부 스크롤 제거 */
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 작은 화면(세로)에서는 조작법을 숨겨 전체가 한 화면에 들어오게 */
+@media (max-height: 860px) {
+  .menu-content { padding: 18px 22px; max-width: 720px; }
+  .controls-info { display: none; }
+  .start-btn, .achievements-btn, .close-achievements { padding: 12px; }
+  .speed-select, .player-color-select { padding: 10px; }
+}
+
+/* 더 작은 화면에 맞춤 - 높이가 부족하면 타이틀/스탯/컨트롤 크기 축소 */
+@media (max-height: 900px) {
+  .game-title { font-size: 30px; margin-bottom: 16px; }
+  .menu-stats { padding: 12px 14px; }
+  .menu-stat-item { margin-bottom: 8px; padding: 6px 0; }
+  .menu-content { padding: 20px 24px; max-width: 760px; }
+  .start-btn { padding: 14px; font-size: 16px; }
+  .achievements-btn { padding: 12px; font-size: 13px; }
+}
+
+@media (max-height: 760px) {
+  .menu-stats { display: none; }
+  .game-title { font-size: 26px; }
+  .menu-content { padding: 16px 20px; max-width: 700px; }
+}
+
+/* 기본 메뉴 스케일(사용자 요청: 90% 보기와 동일하게) */
+:root { --menu-scale: 0.9; }
+.start-menu .menu-content {
+  transform: scale(var(--menu-scale));
+  transform-origin: top center;
+}
+
+.menu-content::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(102, 126, 234, 0.1) 0%, transparent 70%);
+  animation: rotate 20s linear infinite;
+}
+
+.game-title { 
+  margin: 0 0 25px 0; 
+  color: #fff; 
+  font-size: 36px; 
+  font-weight: 900; 
+  font-family: 'Orbitron', sans-serif;
+  text-shadow: 
+    0 0 20px rgba(102, 126, 234, 0.8),
+    0 0 40px rgba(118, 75, 162, 0.6),
+    0 4px 8px rgba(0, 0, 0, 0.5);
+  background: linear-gradient(135deg, #667eea, #764ba2, #f093fb);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  position: relative;
+  z-index: 1;
+  letter-spacing: 2px;
+}
+
+.menu-stats { 
+  margin: 20px 0; 
+  padding: 16px 20px; 
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.15), rgba(118, 75, 162, 0.15));
+  border-radius: 12px;
+  border: 1px solid rgba(102, 126, 234, 0.3);
+  backdrop-filter: blur(10px);
+}
+
+.menu-stat-item { 
+  display: flex; 
+  justify-content: space-between; 
+  margin-bottom: 12px; 
+  font-size: 15px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.menu-stat-item:last-child { 
+  margin-bottom: 0;
+  border-bottom: none;
+}
+
+.menu-stat-label { 
+  color: #a9b0bf; 
+  font-weight: 400;
+}
+
+.menu-stat-value { 
+  color: #ffd54f; 
+  font-weight: 700;
+  text-shadow: 0 0 10px rgba(255, 213, 79, 0.6);
+}
+
+/* ========================================
+   셀렉터 스타일
+   ======================================== */
+.speed-selector, .player-color-selector { 
+  margin: 12px 0; /* 세로 공간 약간 축소 */
+  text-align: center; 
+}
+
+.speed-selector label, .player-color-selector label { 
+  display: block; 
+  color: #fff; 
+  font-size: 14px; 
+  margin-bottom: 10px;
+  font-weight: 500;
+}
+
+.speed-select, .player-color-select { 
+  width: 100%; 
+  padding: 12px; 
+  background: linear-gradient(135deg, rgba(42, 42, 42, 0.8), rgba(30, 30, 30, 0.9));
+  color: #fff; 
+  border: 2px solid rgba(102, 126, 234, 0.5);
+  border-radius: 10px; 
+  font-size: 14px; 
+  cursor: pointer; 
+  font-family: 'Roboto', sans-serif;
+  transition: all 0.3s ease;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+  -webkit-appearance: menulist;
+  -moz-appearance: menulist;
+  appearance: menulist;
+  position: relative;
+  z-index: 1;
+}
+
+.speed-select:hover, .player-color-select:hover { 
+  border-color: rgba(102, 126, 234, 0.8);
+  box-shadow: 
+    inset 0 2px 4px rgba(0, 0, 0, 0.3),
+    0 0 15px rgba(102, 126, 234, 0.4);
+}
+
+.theme-light .speed-selector label, .theme-light .player-color-selector label { 
+  color: #222; 
+}
+
+.theme-light .speed-select, .theme-light .player-color-select { 
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(240, 240, 240, 0.95));
+  color: #222; 
+  border-color: rgba(245, 87, 108, 0.5);
+}
+
+.theme-light .speed-select:hover, .theme-light .player-color-select:hover {
+  border-color: rgba(245, 87, 108, 0.8);
+  box-shadow: 
+    inset 0 2px 4px rgba(0, 0, 0, 0.1),
+    0 0 15px rgba(245, 87, 108, 0.4);
+}
+
+/* ========================================
+   시작 버튼
+   ======================================== */
+.start-btn { 
+  width: 100%; 
+  padding: 16px; 
+  background: linear-gradient(135deg, #4caf50 0%, #45a049 50%, #3d8b40 100%);
+  color: #fff; 
+  border: none; 
+  border-radius: 12px; 
+  cursor: pointer; 
+  font-size: 18px; 
+  font-weight: 700;
+  font-family: 'Roboto', sans-serif;
+  margin: 14px 0 10px 0; /* 버튼 위아래 여백 축소 */
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  box-shadow: 
+    0 6px 20px rgba(76, 175, 80, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.start-btn::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.start-btn:hover { 
+  background: linear-gradient(135deg, #45a049 0%, #3d8b40 50%, #2e7d32 100%);
+  transform: translateY(-3px);
+  box-shadow: 
+    0 8px 25px rgba(76, 175, 80, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.start-btn:hover::before {
+  width: 400px;
+  height: 400px;
+}
+
+.start-btn:active { 
+  transform: translateY(-1px);
+}
+
+/* ========================================
+   업적 버튼
+   ======================================== */
+.achievements-btn { 
+  width: 100%; 
+  padding: 14px; 
+  background: linear-gradient(135deg, #9c27b0 0%, #7b1fa2 50%, #6a1b9a 100%);
+  color: #fff; 
+  border: none; 
+  border-radius: 12px; 
+  cursor: pointer; 
+  font-size: 14px; 
+  font-weight: 700;
+  font-family: 'Roboto', sans-serif;
+  margin-top: 12px; 
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  box-shadow: 
+    0 4px 15px rgba(156, 39, 176, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    position: relative;
+  overflow: hidden;
+}
+
+.achievements-btn:hover { 
+  background: linear-gradient(135deg, #7b1fa2 0%, #6a1b9a 50%, #4a148c 100%);
+  transform: translateY(-2px);
+  box-shadow: 
+    0 6px 20px rgba(156, 39, 176, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+/* ========================================
+   컨트롤 정보
+   ======================================== */
+.controls-info { 
+  margin-top: 12px; /* 상단 여백 축소 */
+  padding-top: 14px; 
+  border-top: 2px solid rgba(102, 126, 234, 0.3);
+  text-align: left; 
+}
+
+.controls-info h3 { 
+  margin: 0 0 16px 0; 
+  color: #fff; 
+  font-size: 16px; 
+  text-align: center;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.control-item { 
+  display: flex; 
+  align-items: center; 
+  gap: 12px; 
+  margin-bottom: 10px; 
+  font-size: 13px; 
+  color: #a9b0bf;
+}
+
+.control-item kbd { 
+  background: linear-gradient(135deg, rgba(42, 42, 42, 0.9), rgba(30, 30, 30, 0.95));
+  color: #fff; 
+  padding: 6px 12px; 
+  border-radius: 6px; 
+  border: 2px solid rgba(102, 126, 234, 0.5);
+  font-family: 'Roboto', monospace; 
+  font-size: 12px;
+  font-weight: 700;
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  min-width: 40px;
+  text-align: center;
+}
+
+/* ========================================
+   업적 모달
+   ======================================== */
+.achievements-modal { 
+  position: fixed; 
+  inset: 0; 
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(10px);
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  z-index: 1000;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.achievements-content { 
+  background: linear-gradient(145deg, rgba(27, 31, 42, 0.95), rgba(20, 24, 33, 0.98));
+  backdrop-filter: blur(30px);
+  padding: 40px; 
+  border-radius: 20px; 
+  max-width: 500px; 
+  width: 90%; 
+  max-height: 80vh; 
+  overflow-y: auto;
+  border: 2px solid transparent;
+  border-image: linear-gradient(135deg, rgba(102, 126, 234, 0.5), rgba(118, 75, 162, 0.5)) 1;
+  box-shadow: 
+    0 20px 60px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.achievements-content h2 { 
+  margin: 0 0 24px 0; 
+  color: #fff; 
+  text-align: center;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.achievements-list { 
+  display: grid; 
+  gap: 12px; 
+}
+
+.achievement-item { 
+  padding: 16px; 
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.2));
+  border-radius: 12px; 
+  border: 2px solid transparent;
+  display: flex; 
+  align-items: center; 
+  gap: 16px;
+  transition: all 0.3s ease;
+}
+
+.achievement-item:hover {
+  transform: translateX(5px);
+}
+
+.achievement-item.unlocked { 
+  border-image: linear-gradient(135deg, #4caf50, #45a049) 1;
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.15), rgba(69, 160, 73, 0.1));
+  box-shadow: 0 0 20px rgba(76, 175, 80, 0.3);
+}
+
+.achievement-item.locked { 
+  opacity: 0.6;
+  filter: grayscale(0.5);
+}
+
+.achievement-icon { 
+  font-size: 32px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+}
+
+.achievement-info { 
+  flex: 1; 
+}
+
+.achievement-name { 
+  color: #fff; 
+  font-weight: 700; 
+  margin-bottom: 4px;
+  font-size: 15px;
+}
+
+.achievement-desc { 
+  color: #a9b0bf; 
+  font-size: 13px;
+}
+
+.achievement-status { 
+  color: #4caf50; 
+  font-size: 12px; 
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.close-achievements { 
+  width: 100%; 
+  padding: 14px; 
+  background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+  color: #fff; 
+  border: none; 
+  border-radius: 12px; 
+  cursor: pointer; 
+  font-size: 14px; 
+  font-weight: 700;
+  font-family: 'Roboto', sans-serif;
+  margin-top: 24px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  box-shadow: 
+    0 4px 15px rgba(76, 175, 80, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+}
+
+.close-achievements:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 6px 20px rgba(76, 175, 80, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+/* ========================================
+   업적 알림
+   ======================================== */
+.achievement-notification { 
+  position: fixed; 
+  top: 30px; 
+  right: 30px; 
+  background: linear-gradient(145deg, rgba(27, 31, 42, 0.95), rgba(20, 24, 33, 0.98));
+  backdrop-filter: blur(30px);
+  padding: 20px 24px; 
+  border-radius: 16px; 
+  border: 2px solid #4caf50;
+  display: flex; 
+  align-items: center; 
+  gap: 16px; 
+  z-index: 2000; 
+  transform: translateX(500px); 
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.5),
+    0 0 30px rgba(76, 175, 80, 0.4);
+}
+
+.achievement-notification.show { 
+  transform: translateX(0); 
+}
+
+.achievement-notification .achievement-icon { 
+  font-size: 40px;
+  filter: drop-shadow(0 4px 8px rgba(76, 175, 80, 0.6));
+}
+
+.achievement-notification .achievement-name { 
+  color: #4caf50; 
+  font-weight: 700; 
+  font-size: 16px; 
+  margin-bottom: 4px;
+  text-shadow: 0 0 10px rgba(76, 175, 80, 0.6);
+}
+
+.achievement-notification .achievement-desc { 
+  color: #a9b0bf; 
+  font-size: 13px; 
+}
+
+/* ========================================
+   아이템 콤보 알림
+   ======================================== */
+.item-combo-notification { 
+  position: fixed; 
+  top: 50%; 
+  left: 50%; 
+  transform: translate(-50%, -50%) scale(0);
+  background: linear-gradient(135deg, #4caf50, #45a049);
+  color: #fff; 
+  padding: 20px 35px; 
+  border-radius: 16px; 
+  font-size: 28px; 
+  font-weight: 900;
+  font-family: 'Orbitron', sans-serif;
+  z-index: 1500; 
+  box-shadow: 
+    0 8px 32px rgba(76, 175, 80, 0.6),
+    0 0 40px rgba(76, 175, 80, 0.4);
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  text-transform: uppercase;
+  letter-spacing: 3px;
+}
+
+.item-combo-notification.show { 
+  transform: translate(-50%, -50%) scale(1);
+}
+
+/* ========================================
+   일시정지 오버레이
+   ======================================== */
+.pause-overlay { 
+  position: absolute; 
+  top: 0; 
+  left: 0; 
+  width: 100%; 
+  height: 100%; 
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(10px);
+  display: none; /* 기본적으로 숨김 */
+  align-items: center; 
+  justify-content: center; 
+  z-index: 1000; /* 높은 z-index로 다른 요소 위에 표시 */
+  border-radius: 8px;
+  pointer-events: all; /* 클릭 이벤트 처리 */
+}
+
+.pause-overlay[style*="display: flex"],
+.pause-overlay[style*="display:flex"] {
+  display: flex !important;
+}
+
+.pause-content { 
+  background: linear-gradient(145deg, rgba(27, 31, 42, 0.95), rgba(20, 24, 33, 0.98));
+  backdrop-filter: blur(30px);
+  padding: 40px 50px; 
+  border-radius: 20px; 
+  text-align: center; 
+  border: 2px solid transparent;
+  border-image: linear-gradient(135deg, rgba(102, 126, 234, 0.5), rgba(118, 75, 162, 0.5)) 1;
+  box-shadow: 
+    0 20px 60px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.pause-content h2 { 
+  margin: 0 0 12px 0; 
+  color: #fff; 
+  font-size: 32px;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.pause-content p { 
+  margin: 0; 
+  color: #a9b0bf; 
+  font-size: 16px;
+  font-weight: 500;
+}
+
+/* ========================================
+   라이트 테마 오버라이드
+   ======================================== */
+.theme-light body { 
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 50%, #dee2e6 100%);
+  background-size: 200% 200%;
+  color: #222; 
+}
+
+.theme-light body::before {
+  background: 
+    radial-gradient(circle at 20% 50%, rgba(79, 172, 254, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(245, 87, 108, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 40% 20%, rgba(255, 107, 107, 0.1) 0%, transparent 50%);
+}
+
+.theme-light .theme-toggle, .theme-light .sound-toggle { 
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: #fff;
+  box-shadow: 0 4px 15px rgba(245, 87, 108, 0.4);
+}
+
+.theme-light canvas { 
+  background: linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%);
+  border-image: linear-gradient(135deg, #f093fb, #f5576c, #4facfe) 1;
+}
+
+.theme-light .item-hud { 
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(248, 249, 250, 0.98));
+  border-image: linear-gradient(135deg, #4facfe, #00f2fe, #667eea) 1;
+}
+
+.theme-light .ability-bar {
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.05));
+  border-color: rgba(79, 172, 254, 0.2);
+}
+
+.theme-light .slot .icon { 
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.6), rgba(240, 240, 240, 0.8));
+  border-image: linear-gradient(135deg, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.1)) 1;
+}
+
+.theme-light .slot .skill-name { 
+  color: #222; 
+}
+
+.theme-light .slot .key { 
+  color: #444;
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.theme-light .slot .meta { 
+  color: #666; 
+}
+
+.theme-light .slot .count { 
+  background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
+}
+
+.theme-light .start-menu { 
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.theme-light .menu-content { 
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(248, 249, 250, 0.98));
+  border-image: linear-gradient(135deg, rgba(245, 87, 108, 0.5), rgba(79, 172, 254, 0.5)) 1;
+}
+
+.theme-light .game-title { 
+  background: linear-gradient(135deg, #f093fb, #f5576c, #4facfe);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.theme-light .menu-stats { 
+  background: linear-gradient(135deg, rgba(79, 172, 254, 0.15), rgba(0, 242, 254, 0.15));
+  border-color: rgba(79, 172, 254, 0.3);
+}
+
+.theme-light .menu-stat-label { 
+  color: #666; 
+}
+
+.theme-light .menu-stat-value { 
+  color: #f57c00;
+  text-shadow: 0 0 10px rgba(245, 124, 0, 0.4);
+}
+
+.theme-light .start-btn { 
+  background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+}
+
+.theme-light .controls-info { 
+  border-top-color: rgba(245, 87, 108, 0.3);
+}
+
+.theme-light .control-item { 
+  color: #666; 
+}
+
+.theme-light .control-item kbd { 
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(240, 240, 240, 0.95));
+  color: #222; 
+  border-color: rgba(245, 87, 108, 0.5);
+}
+
+.theme-light .achievements-content { 
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(248, 249, 250, 0.98));
+  border-image: linear-gradient(135deg, rgba(245, 87, 108, 0.5), rgba(79, 172, 254, 0.5)) 1;
+}
+
+.theme-light .achievements-content h2 { 
+  background: linear-gradient(135deg, #f093fb, #f5576c);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.theme-light .achievement-item { 
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.02));
+}
+
+.theme-light .achievement-name { 
+  color: #222; 
+}
+
+.theme-light .achievement-desc { 
+  color: #666; 
+}
+
+.theme-light .achievement-notification { 
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(248, 249, 250, 0.98));
+  border-color: #4caf50;
+}
+
+.theme-light .achievement-notification .achievement-name { 
+  color: #4caf50; 
+}
+
+.theme-light .achievement-notification .achievement-desc { 
+  color: #666; 
+}
+
+.theme-light .pause-overlay { 
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.theme-light .pause-content { 
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(248, 249, 250, 0.98));
+  border-image: linear-gradient(135deg, rgba(245, 87, 108, 0.5), rgba(79, 172, 254, 0.5)) 1;
+}
+
+.theme-light .pause-content h2 { 
+  background: linear-gradient(135deg, #f093fb, #f5576c);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.theme-light .pause-content p { 
+  color: #666; 
+}
+
+/* ========================================
+   스크롤바 스타일링
+   ======================================== */
+.achievements-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.achievements-content::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+.achievements-content::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border-radius: 4px;
+}
+
+.achievements-content::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #764ba2, #667eea);
+}
+
+/* ========================================
+   반응형 레이아웃 조정
+   ======================================== */
+@media (max-width: 800px) {
+  .game-wrap {
+    flex-direction: column;
+    gap: 16px;
+    padding: 16px;
+  }
+  
+  canvas {
+    width: 100%;
+    max-width: calc(100vw - 80px);
+    height: auto;
+    aspect-ratio: 800 / 600;
+  }
+  
+  .item-hud {
+    width: 100%;
+    max-width: calc(100vw - 80px);
+    height: auto;
+    min-height: 400px;
+  }
+  
+  .theme-toggle, .sound-toggle {
+    top: 10px;
+    right: 10px;
+    padding: 8px 16px;
+    font-size: 12px;
+  }
+  
+  .sound-toggle {
+    right: 90px;
+  }
+}

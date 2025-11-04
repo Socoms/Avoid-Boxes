@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="KO">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Avoid Boxes</title>
+
+        <link rel="stylesheet" href="css/style.css">
+    </head>
+    <body>
+        <button id="themeToggle" class="theme-toggle" aria-label="Toggle theme">Dark</button>
+        <button id="soundToggle" class="sound-toggle" aria-label="Toggle sound" title="사운드 끄기">🔊</button>
+        <div id="startMenu" class="start-menu">
+                <div class="menu-content">
+                    <h1 class="game-title">Avoid Boxes</h1>
+                    <div class="menu-stats">
+                        <div class="menu-stat-item">
+                            <span class="menu-stat-label">최고 점수</span>
+                            <span id="menuBestScore" class="menu-stat-value">0</span>
+                        </div>
+                        <div class="menu-stat-item">
+                            <span class="menu-stat-label">최고 시간</span>
+                            <span id="menuBestTime" class="menu-stat-value">0초</span>
+                        </div>
+                        <div class="menu-stat-item">
+                            <span class="menu-stat-label">최고 콤보</span>
+                            <span id="menuBestCombo" class="menu-stat-value">0x</span>
+                        </div>
+                    </div>
+                    <div class="speed-selector">
+                        <label>게임 속도:</label>
+                        <select id="speedSelect" class="speed-select">
+                            <option value="0.75">느림</option>
+                            <option value="1.0" selected>보통</option>
+                            <option value="1.5">빠름</option>
+                        </select>
+                    </div>
+                    <div class="player-color-selector">
+                        <label>플레이어 색상:</label>
+                        <select id="playerColorSelect" class="player-color-select">
+                            <option value="">자동 (테마에 따라)</option>
+                            <option value="#ff4444">빨강</option>
+                            <option value="#4444ff">파랑</option>
+                            <option value="#44ff44">초록</option>
+                            <option value="#ffff44">노랑</option>
+                            <option value="#ff44ff">보라</option>
+                            <option value="#44ffff">청록</option>
+                            <option value="#ff8844">주황</option>
+                        </select>
+                    </div>
+                    <button id="startBtn" class="start-btn">게임 시작</button>
+                    <button id="achievementsBtn" class="achievements-btn">업적 보기</button>
+                    <div id="achievementsModal" class="achievements-modal" style="display:none;">
+                        <div class="achievements-content">
+                            <h2>업적</h2>
+                            <div id="achievementsList" class="achievements-list"></div>
+                            <button class="close-achievements">닫기</button>
+                        </div>
+                    </div>
+                    <div class="controls-info">
+                        <h3>조작법</h3>
+                        <div class="control-item">
+                            <kbd>←</kbd> <kbd>→</kbd> <span>이동</span>
+                        </div>
+                        <div class="control-item">
+                            <kbd>Space</kbd> <span>숨기 스킬</span>
+                        </div>
+                        <div class="control-item">
+                            <kbd>Q</kbd> <span>무적 스킬 (아이템 필요)</span>
+                        </div>
+                        <div class="control-item">
+                            <kbd>W</kbd> <span>소형화 스킬 (아이템 필요)</span>
+                        </div>
+                        <div class="control-item">
+                            <kbd>E</kbd> <span>슬로우 모션 스킬 (아이템 필요)</span>
+                        </div>
+                        <div class="control-item">
+                            <kbd>ESC</kbd> <span>일시정지</span>
+                        </div>
+                        <div class="control-item">
+                            <kbd>P</kbd> <span>재시작 (게임 오버 후)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <div class="game-wrap">
+            <div class="canvas-container">
+                <canvas id="gameCanvas" width="800" height="600"></canvas>
+                <div id="pauseOverlay" class="pause-overlay" style="display:none;">
+                    <div class="pause-content">
+                        <h2>일시정지</h2>
+                        <p>ESC 키를 눌러 재개하세요</p>
+                    </div>
+                </div>
+            </div>
+            <aside id="itemHud" class="item-hud" style="display:none;">
+                <div id="livesHud" class="lives-hud" aria-label="Lives"></div>
+                <div id="statsDisplay" class="stats-display"></div>
+                <div class="ability-bar">
+                    <div class="slot" id="slot-hide" data-total="15000">
+                        <div class="icon">
+                            <svg viewBox="0 0 64 64" aria-hidden="true">
+                                <defs>
+                                    <linearGradient id="g-hide" x1="0" y1="0" x2="1" y2="1">
+                                        <stop offset="0" stop-color="#bdbdbd"/>
+                                        <stop offset="1" stop-color="#616161"/>
+                                    </linearGradient>
+                                </defs>
+                                <rect width="64" height="64" fill="url(#g-hide)"/>
+                                <path d="M32 14a14 14 0 1 0 0 28 16 16 0 1 1 0-28z" fill="#fff" fill-opacity="0.9"/>
+                            </svg>
+                            <div class="cool-overlay"><div class="pie"></div><span class="remain"></span></div>
+                        </div>
+                        <div class="count" style="display:none;">0</div>
+                        <div class="skill-name">숨기</div>
+                        <div class="key">Space</div>
+                        <div class="meta"><span class="dur"></span> / <span class="cd-total"></span></div>
+                    </div>
+                    <div class="slot" id="slot-inv" data-total="60000">
+                        <div class="icon">
+                            <svg viewBox="0 0 64 64" aria-hidden="true">
+                                <defs>
+                                    <linearGradient id="g-inv" x1="0" y1="0" x2="1" y2="1">
+                                        <stop offset="0" stop-color="#26c6da"/>
+                                        <stop offset="1" stop-color="#0097a7"/>
+                                    </linearGradient>
+                                </defs>
+                                <rect width="64" height="64" fill="url(#g-inv)"/>
+                                <path d="M32 10l18 8v12c0 10-7.5 18.7-18 22-10.5-3.3-18-12-18-22V18l18-8z" fill="#fff" fill-opacity="0.9"/>
+                            </svg>
+                            <div class="cool-overlay"><div class="pie"></div><span class="remain"></span></div>
+                        </div>
+                        <div class="count">0</div>
+                        <div class="skill-name">무적</div>
+                        <div class="key">Q</div>
+                        <div class="meta"><span class="dur"></span> / <span class="cd-total"></span></div>
+                    </div>
+                    <div class="slot" id="slot-shr" data-total="45000">
+                        <div class="icon">
+                            <svg viewBox="0 0 64 64" aria-hidden="true">
+                                <defs>
+                                    <linearGradient id="g-shr" x1="0" y1="0" x2="1" y2="1">
+                                        <stop offset="0" stop-color="#9ccc65"/>
+                                        <stop offset="1" stop-color="#558b2f"/>
+                                    </linearGradient>
+                                </defs>
+                                <rect width="64" height="64" fill="url(#g-shr)"/>
+                                <path d="M20 20h10v-8l12 12-12 12v-8H20V20zm24 24H34v8L22 40l12-12v8h10v8z" fill="#fff" fill-opacity="0.9"/>
+                            </svg>
+                            <div class="cool-overlay"><div class="pie"></div><span class="remain"></span></div>
+                        </div>
+                        <div class="count">0</div>
+                        <div class="skill-name">소형화</div>
+                        <div class="key">W</div>
+                        <div class="meta"><span class="dur"></span> / <span class="cd-total"></span></div>
+                    </div>
+                    <div class="slot" id="slot-slow" data-total="30000">
+                        <div class="icon">
+                            <svg viewBox="0 0 64 64" aria-hidden="true">
+                                <defs>
+                                    <linearGradient id="g-slow" x1="0" y1="0" x2="1" y2="1">
+                                        <stop offset="0" stop-color="#9c27b0"/>
+                                        <stop offset="1" stop-color="#6a1b9a"/>
+                                    </linearGradient>
+                                </defs>
+                                <rect width="64" height="64" fill="url(#g-slow)"/>
+                                <circle cx="32" cy="32" r="14" fill="none" stroke="#fff" stroke-width="2" stroke-opacity="0.9"/>
+                                <line x1="32" y1="18" x2="32" y2="26" stroke="#fff" stroke-width="2" stroke-opacity="0.9" stroke-linecap="round"/>
+                                <line x1="32" y1="32" x2="38" y2="32" stroke="#fff" stroke-width="2" stroke-opacity="0.9" stroke-linecap="round"/>
+                            </svg>
+                            <div class="cool-overlay"><div class="pie"></div><span class="remain"></span></div>
+                        </div>
+                        <div class="count">0</div>
+                        <div class="skill-name">슬로우</div>
+                        <div class="key">E</div>
+                        <div class="meta"><span class="dur"></span> / <span class="cd-total"></span></div>
+                    </div>
+                </div>
+                <div class="game-controls">
+                    <button id="restartBtn" class="restart-btn">재시작 (P)</button>
+                </div>
+            </aside>
+        </div>
+        <script src="js/avoid_boxes.js"></script>
+        <script>
+            // 초기화 함수
+            function initializeSelectors() {
+                console.log('초기화 시작');
+                
+                // 게임 속도 선택기 이벤트 리스너
+                const speedSelect = document.getElementById('speedSelect');
+                console.log('speedSelect 요소:', speedSelect);
+                if (speedSelect) {
+                    // 저장된 게임 속도 불러오기
+                    const savedSpeed = localStorage.getItem('ab_gameSpeed');
+                    if (savedSpeed) {
+                        speedSelect.value = savedSpeed;
+                        console.log('저장된 게임 속도 불러오기:', savedSpeed);
+                    }
+                    
+                    // 게임 속도 변경 시 저장 및 즉시 반영
+                    // 기존 이벤트 리스너 제거를 위해 새로 추가
+                    speedSelect.addEventListener('change', function() {
+                        const selectedSpeed = this.value;
+                        console.log('게임 속도 변경 이벤트 발생:', selectedSpeed);
+                        localStorage.setItem('ab_gameSpeed', selectedSpeed);
+                        // avoid_boxes.js의 전역 변수 gameSpeed 업데이트
+                        if (typeof gameSpeed !== 'undefined') {
+                            gameSpeed = parseFloat(selectedSpeed);
+                            console.log('게임 속도 변수 업데이트:', gameSpeed);
+                        }
+                        console.log('게임 속도 저장 완료:', selectedSpeed);
+                    }, { once: false });
+                    
+                    // input 이벤트도 추가 (일부 브라우저 대응)
+                    speedSelect.addEventListener('input', function() {
+                        const selectedSpeed = this.value;
+                        localStorage.setItem('ab_gameSpeed', selectedSpeed);
+                        if (typeof gameSpeed !== 'undefined') {
+                            gameSpeed = parseFloat(selectedSpeed);
+                        }
+                    }, { once: false });
+                } else {
+                    console.error('speedSelect 요소를 찾을 수 없습니다.');
+                }
+                
+                // 플레이어 색상 선택기 이벤트 리스너
+                const playerColorSelect = document.getElementById('playerColorSelect');
+                console.log('playerColorSelect 요소:', playerColorSelect);
+                if (playerColorSelect) {
+                    // 저장된 플레이어 색상 불러오기
+                    const savedColor = localStorage.getItem('ab_playerColor');
+                    if (savedColor !== null) {
+                        playerColorSelect.value = savedColor || '';
+                        console.log('저장된 플레이어 색상 불러오기:', savedColor);
+                    }
+                    
+                    // 플레이어 색상 변경 시 저장 및 즉시 반영
+                    // 기존 이벤트 리스너 제거를 위해 새로 추가
+                    playerColorSelect.addEventListener('change', function() {
+                        const colorValue = this.value || '';
+                        console.log('플레이어 색상 변경 이벤트 발생:', colorValue || '자동');
+                        localStorage.setItem('ab_playerColor', colorValue);
+                        // avoid_boxes.js의 전역 변수 player.color 업데이트
+                        if (typeof player !== 'undefined') {
+                            player.color = colorValue || null;
+                            console.log('플레이어 색상 변수 업데이트:', player.color);
+                        }
+                        console.log('플레이어 색상 저장 완료:', colorValue || '자동');
+                    }, { once: false });
+                    
+                    // input 이벤트도 추가 (일부 브라우저 대응)
+                    playerColorSelect.addEventListener('input', function() {
+                        const colorValue = this.value || '';
+                        localStorage.setItem('ab_playerColor', colorValue);
+                        if (typeof player !== 'undefined') {
+                            player.color = colorValue || null;
+                        }
+                    }, { once: false });
+                } else {
+                    console.error('playerColorSelect 요소를 찾을 수 없습니다.');
+                }
+            }
+            
+            // DOM이 완전히 로드된 후 실행
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', function() {
+                    console.log('DOMContentLoaded 이벤트 발생');
+                    setTimeout(initializeSelectors, 100);
+                });
+            } else {
+                console.log('DOM이 이미 로드됨');
+                setTimeout(initializeSelectors, 100);
+            }
+            
+            // window.onload도 추가 (더 확실하게)
+            window.addEventListener('load', function() {
+                console.log('window.onload 이벤트 발생');
+                setTimeout(initializeSelectors, 200);
+            });
+            
+            // 게임 시작 버튼
+            const startBtn = document.getElementById('startBtn');
+            if (startBtn) {
+                startBtn.addEventListener('click', startGame);
+            }
+            
+            // 사운드 토글 버튼
+            const soundToggle = document.getElementById('soundToggle');
+            if (soundToggle) {
+                soundToggle.addEventListener('click', () => {
+                    if (typeof toggleSound === 'function') {
+                        toggleSound();
+                    }
+                });
+            }
+            
+            // 저장된 사운드 설정 불러오기
+            const savedSound = localStorage.getItem('ab_sound');
+            if (savedSound === 'off') {
+                soundEnabled = false;
+                const soundBtn = document.getElementById('soundToggle');
+                if (soundBtn) {
+                    soundBtn.textContent = '🔇';
+                    soundBtn.title = '사운드 켜기';
+                }
+            }
+            
+            // 업적 버튼
+            const achievementsBtn = document.getElementById('achievementsBtn');
+            if (achievementsBtn) {
+                achievementsBtn.addEventListener('click', () => {
+                    const modal = document.getElementById('achievementsModal');
+                    if (modal) {
+                        modal.style.display = 'flex';
+                        updateAchievementsList();
+                    }
+                });
+            }
+            
+            const closeAchievements = document.querySelector('.close-achievements');
+            if (closeAchievements) {
+                closeAchievements.addEventListener('click', () => {
+                    const modal = document.getElementById('achievementsModal');
+                    if (modal) {
+                        modal.style.display = 'none';
+                    }
+                });
+            }
+            
+            function updateAchievementsList() {
+                const list = document.getElementById('achievementsList');
+                const unlocked = typeof getUnlockedAchievements === 'function' ? getUnlockedAchievements() : [];
+                if (typeof achievements !== 'undefined') {
+                    list.innerHTML = achievements.map(ach => {
+                        const isUnlocked = unlocked.includes(ach.id);
+                        return `
+                            <div class="achievement-item ${isUnlocked ? 'unlocked' : 'locked'}">
+                                <div class="achievement-icon">${isUnlocked ? '🏆' : '🔒'}</div>
+                                <div class="achievement-info">
+                                    <div class="achievement-name">${ach.name}</div>
+                                    <div class="achievement-desc">${ach.desc}</div>
+                                </div>
+                                ${isUnlocked ? '<div class="achievement-status">달성</div>' : ''}
+                            </div>
+                        `;
+                    }).join('');
+                }
+            }
+            
+            // 재시작 버튼
+            const restartBtn = document.getElementById('restartBtn');
+            if (restartBtn) {
+                restartBtn.addEventListener('click', resetGame);
+            }
+            
+            document.addEventListener('keydown', function(e) {
+                if ((e.key === 'p' || e.key === 'P') && typeof gameOver !== 'undefined' && gameOver) {
+                    e.preventDefault();
+                    resetGame();
+                }
+            });
+            
+            // 통계 표시 업데이트
+            function updateStatsDisplay() {
+                if (typeof getStats === 'function') {
+                    const stats = getStats();
+                    const display = document.getElementById('statsDisplay');
+                    if (display) {
+                        display.innerHTML = `
+                            <div class="stat-item">
+                                <span class="stat-label">최고 점수:</span>
+                                <span class="stat-value">${(stats.bestScore || 0).toLocaleString()}</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">최고 시간:</span>
+                                <span class="stat-value">${(stats.bestTime || 0).toFixed(1)}초</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">최고 콤보:</span>
+                                <span class="stat-value">${stats.bestCombo || 0}x</span>
+                            </div>
+                        `;
+                    }
+                }
+            }
+            setInterval(updateStatsDisplay, 1000);
+            updateStatsDisplay();
+            
+            // 메뉴 통계도 주기적으로 업데이트
+            setInterval(() => {
+                if (typeof updateMenuStats === 'function') {
+                    updateMenuStats();
+                }
+            }, 1000);
+        </script>
+    </body>
+</html>
