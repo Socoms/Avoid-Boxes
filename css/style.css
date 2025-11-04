@@ -686,6 +686,33 @@ canvas {
   z-index: 1;
 }
 
+/* 다크모드에서 select option 스타일 */
+.speed-select option, .player-color-select option {
+  background: rgba(30, 30, 30, 0.95) !important;
+  color: #fff !important;
+  padding: 10px;
+}
+
+.speed-select option:checked, .player-color-select option:checked {
+  background: rgba(102, 126, 234, 0.8) !important;
+  color: #fff !important;
+}
+
+.speed-select option:hover, .player-color-select option:hover {
+  background: rgba(102, 126, 234, 0.6) !important;
+  color: #fff !important;
+}
+
+/* 다크모드에서 select 드롭다운 배경 */
+.speed-select, .player-color-select {
+  background-color: rgba(30, 30, 30, 0.95) !important;
+}
+
+.speed-select:focus, .player-color-select:focus {
+  background-color: rgba(30, 30, 30, 0.95) !important;
+  color: #fff !important;
+}
+
 .speed-select:hover, .player-color-select:hover { 
   border-color: rgba(102, 126, 234, 0.8);
   box-shadow: 
@@ -701,6 +728,28 @@ canvas {
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(240, 240, 240, 0.95));
   color: #222; 
   border-color: rgba(245, 87, 108, 0.5);
+}
+
+/* 밝은 테마에서 select option 스타일 */
+.theme-light .speed-select option, .theme-light .player-color-select option {
+  background: rgba(255, 255, 255, 0.95) !important;
+  color: #222 !important;
+  padding: 10px;
+}
+
+.theme-light .speed-select option:checked, .theme-light .player-color-select option:checked {
+  background: rgba(245, 87, 108, 0.8) !important;
+  color: #fff !important;
+}
+
+.theme-light .speed-select option:hover, .theme-light .player-color-select option:hover {
+  background: rgba(245, 87, 108, 0.6) !important;
+  color: #fff !important;
+}
+
+.theme-light .speed-select:focus, .theme-light .player-color-select:focus {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  color: #222 !important;
 }
 
 .theme-light .speed-select:hover, .theme-light .player-color-select:hover {
